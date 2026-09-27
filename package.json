@@ -1,6 +1,6 @@
 {
   "name": "hdbviewer",
-  "displayName": "HDBViewer",
+  "displayName": "HDB Viewer",
   "description": "Display the contents of a Tokyo Cabinet Hash DB file as a table",
   "version": "0.0.1",
   "engines": {
@@ -14,8 +14,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "hdbviewer.helloWorld",
-        "title": "Hello World"
+        "command": "hdbviewer.open",
+        "title": "HDB Viewer: Open Hash DB"
       }
     ]
   },
