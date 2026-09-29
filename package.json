@@ -12,6 +12,21 @@
   "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
+    "customEditors": [
+      {
+        "viewType": "hdbviewer.hashDB",
+        "displayName": "Tokyo Cabinet Hash DB",
+        "selector": [
+          {
+            "filenamePattern": "*.tch"
+          },
+          {
+            "filenamePattern": "*.hdb"
+          }
+        ],
+        "priority": "default"
+      }
+    ],
     "commands": [
       {
         "command": "hdbviewer.open",

@@ -1,10 +1,18 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import { HdbEditorProvider } from './hdbEditorProvider';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+  context.subscriptions.push(
+    vscode.window.registerCustomEditorProvider(HdbEditorProvider.viewType, new HdbEditorProvider(context), {
+      webviewOptions: { retainContextWhenHidden: true },
+      supportsMultipleEditorsPerDocument: true,
+    }),
+  );
+
   context.subscriptions.push(
     vscode.commands.registerCommand('hdbviewer.open', async () => {
       const picked = await vscode.window.showOpenDialog({
@@ -18,7 +26,7 @@ export function activate(context: vscode.ExtensionContext) {
       if (!picked || picked.length === 0) {
         return;
       }
-      await vscode.commands.executeCommand('vscode.openWith', picked[0], 'hdbviewer.hashDB');
+      await vscode.commands.executeCommand('vscode.openWith', picked[0], HdbEditorProvider.viewType);
     }),
   );
 }
