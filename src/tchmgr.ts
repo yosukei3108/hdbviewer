@@ -80,7 +80,6 @@ export async function readInform(cfg: Config, lock: string, filePath: string): P
 
   return parseInform(Buffer.concat(chunks).toString('utf8'));
 }
-
 function parseInform(output: string): Record<string, string> {
   const inform: Record<string, string> = {};
   for (const line of output.split('\n')) {
@@ -100,7 +99,6 @@ export async function readKeys(cfg: Config, lock: string, filePath: string): Pro
 
   return parseKeys(Buffer.concat(chunks).toString('utf8'));
 }
-
 function parseKeys(output: string): string[] {
   const keys: string[] = [];
   const lines = output.split('\n');
@@ -112,6 +110,34 @@ function parseKeys(output: string): string[] {
   }
 
   return keys;
+}
+
+export async function readRecords(cfg: Config, lock: string, filePath: string): Promise<HdbRecord[]> {
+  const chunks: Buffer[] = [];
+  await spawnTchmgr(cfg, ['list', lock, '-px', '-pv', filePath], (chunk) => chunks.push(chunk));
+
+  return parseRecords(Buffer.concat(chunks).toString('utf8'));
+}
+function parseRecords(output: string): HdbRecord[] {
+  const records: HdbRecord[] = [];
+  const lines = output.split('\n');
+  // Drop the '' after the trailing newline. Note that Tokyo Cabinet allows empty keys.
+  lines.pop();
+  for (const line of lines) {
+    // "66 6F 6F<TAB>62 61 72" -> key "666F6F", value "626172"
+    const [key, value] = line.split('\t').map((hex) => hex.replace(/ /g, ''));
+    records.push({
+      key,
+      keyTruncated: false,
+      keyBytes: key.length / 2,
+      value,
+      valueTruncated: false,
+      valueBytes: value.length / 2,
+      valueLoaded: true,
+    });
+  }
+
+  return records;
 }
 
 

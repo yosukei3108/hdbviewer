@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { randomBytes } from 'crypto';
-import { readConfig, readInform, readKeys} from './tchmgr';
+import { readConfig, readInform, readKeys, readRecords } from './tchmgr';
 
 export class HdbEditorProvider implements vscode.CustomReadonlyEditorProvider {
   static readonly viewType = 'hdbviewer.hashDB';
@@ -34,6 +34,9 @@ export class HdbEditorProvider implements vscode.CustomReadonlyEditorProvider {
         } else if (msg.type === 'list') {
           const keys = await readKeys(cfg, lock, document.uri.fsPath);
           webview.postMessage({ type: 'keys', keys });
+        } else if (msg.type === 'list-pv') {
+          const records = await readRecords(cfg, lock, document.uri.fsPath);
+          webview.postMessage({ type: 'records', records });
         }
       } catch (e) {
         webview.postMessage({ type: 'error', message: e instanceof Error ? e.message : String(e) });
@@ -93,6 +96,7 @@ export class HdbEditorProvider implements vscode.CustomReadonlyEditorProvider {
   <div class="toolbar">
     <button id="inform">tchmgr inform</button>
     <button id="list">tchmgr list</button>
+    <button id="list-pv">tchmgr list -pv</button>
   </div>
   <pre id="debugOut"></pre>
 </header>
