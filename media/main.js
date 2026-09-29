@@ -6,9 +6,6 @@
   const $ = (id) => document.getElementById(id);
   const els = {
     fileName: $('fileName'),
-    inform: $('inform'),
-    list: $('list'),
-    listPv: $('listPv'),
     search: $('search'),
     reload: $('reload'),
     prev: $('prev'),
@@ -17,21 +14,6 @@
     infoList: $('infoList'),
   }
 
-
-  els.inform.addEventListener('click', () => {
-    out.textContent = 'tchmgr inform clicked';
-    vscode.postMessage({ type: 'inform' });
-  });
-
-  els.list.addEventListener('click', () => {
-    out.textContent = 'tchmgr list clicked';
-    vscode.postMessage({type: 'list'});
-  });
-
-  els.listPv.addEventListener('click', () => {
-    out.textContent = 'tchmgr list -pv clicked';
-    vscode.postMessage({type: 'listPv'});
-  });
 
   function renderInfo(info) {
     const fragment = document.createDocumentFragment();
@@ -43,20 +25,6 @@
       fragment.append(dt, dd);
     }
     els.infoList.replaceChildren(fragment);
-  }
-
-  function renderKeys(keys) {
-    const rows = keys.map((key, i) => {
-      const tr = document.createElement('tr');
-      for (const [text, cls] of [[String(i + 1), 'num'], [key, 'text'], ['', 'text']]) {
-        const td = document.createElement('td');
-        td.className = cls;
-        td.textContent = text;
-        tr.append(td);
-      }
-      return tr;
-    });
-    tbody.replaceChildren(...rows);
   }
 
   function renderRecords(records) {
@@ -85,14 +53,6 @@
       renderRecords(msg.records);
       setBusy(false);
       out.textContent = 'HDB file is loaded';
-    } else if (msg.type === 'inform') {
-      out.textContent = JSON.stringify(msg.info, null, 2);
-    } else if (msg.type === 'keys') {
-      out.textContent = `${msg.keys.length} keys`;
-      renderKeys(msg.keys);
-    } else if (msg.type === 'records') {
-      out.textContent = `${msg.records.length} records`;
-      renderRecords(msg.records);
     } else if (msg.type === 'error') {
       out.textContent = msg.message;
     }
@@ -109,9 +69,6 @@
   }
 
   function setBusy(busy) {
-    els.inform.disabled = busy;
-    els.list.disabled = busy;
-    els.listPv.disabled = busy;
     els.search.disabled = busy;
     els.reload.disabled = busy;
     els.prev.disabled = busy;
@@ -120,7 +77,7 @@
   }
 
 
-  //setBusy(true);
+  setBusy(true);
   out.textContent = 'loading...';
   vscode.postMessage({ type: 'ready' });
 })();

@@ -80,6 +80,7 @@ export async function readInform(cfg: Config, lock: string, filePath: string): P
 
   return parseInform(Buffer.concat(chunks).toString('utf8'));
 }
+
 function parseInform(output: string): Record<string, string> {
   const inform: Record<string, string> = {};
   for (const line of output.split('\n')) {
@@ -93,24 +94,6 @@ function parseInform(output: string): Record<string, string> {
   return inform;
 }
 
-export async function readKeys(cfg: Config, lock: string, filePath: string): Promise<string[]> {
-  const chunks: Buffer[] = [];
-  await spawnTchmgr(cfg, ['list', lock, '-px', filePath], (chunk) => chunks.push(chunk));
-
-  return parseKeys(Buffer.concat(chunks).toString('utf8'));
-}
-function parseKeys(output: string): string[] {
-  const keys: string[] = [];
-  const lines = output.split('\n');
-  // Drop the '' after the trailing newline. Note that Tokyo Cabinet allows empty keys.
-  lines.pop();
-  for (const line of lines) {
-    // "66 6F 6F" -> "666F6F" -> "foo"
-    keys.push(Buffer.from(line.replace(/ /g, ''), 'hex').toString('utf8'));
-  }
-
-  return keys;
-}
 
 export async function readRecords(cfg: Config, lock: string, filePath: string): Promise<HdbRecord[]> {
   const chunks: Buffer[] = [];
@@ -118,6 +101,7 @@ export async function readRecords(cfg: Config, lock: string, filePath: string): 
 
   return parseRecords(Buffer.concat(chunks).toString('utf8'));
 }
+
 function parseRecords(output: string): HdbRecord[] {
   const records: HdbRecord[] = [];
   const lines = output.split('\n');

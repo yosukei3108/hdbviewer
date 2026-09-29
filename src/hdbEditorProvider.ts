@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { randomBytes } from 'crypto';
-import { readConfig, readInform, readKeys, readRecords } from './tchmgr';
+import { readConfig, readInform, readRecords } from './tchmgr';
 
 export class HdbEditorProvider implements vscode.CustomReadonlyEditorProvider {
   static readonly viewType = 'hdbviewer.hashDB';
@@ -23,27 +23,16 @@ export class HdbEditorProvider implements vscode.CustomReadonlyEditorProvider {
     const fileName = path.basename(document.uri.fsPath);
     let generation = 0;
 
-    // For manual testing: call only tchmgr inform / list.
     const subscription = webview.onDidReceiveMessage(async (msg: { type: string }) => {
       try {
         const cfg = readConfig();
         const lock = cfg.noLock ? '-nl' : '-nb';
         if (msg.type === 'ready') {
-          // inform と list -pv を両方やって、まとめて送り返す
           const [info, records] = await Promise.all([
             readInform(cfg, lock, document.uri.fsPath),
             readRecords(cfg, lock, document.uri.fsPath)
           ]);
           webview.postMessage({ type: 'data', fileName, info, records });
-        } else if (msg.type === 'inform') {
-          const info = await readInform(cfg, lock, document.uri.fsPath);
-          webview.postMessage({ type: 'inform', info });
-        } else if (msg.type === 'list') {
-          const keys = await readKeys(cfg, lock, document.uri.fsPath);
-          webview.postMessage({ type: 'keys', keys });
-        } else if (msg.type === 'listPv') {
-          const records = await readRecords(cfg, lock, document.uri.fsPath);
-          webview.postMessage({ type: 'records', records });
         }
       } catch (e) {
         webview.postMessage({ type: 'error', message: e instanceof Error ? e.message : String(e) });
@@ -99,12 +88,6 @@ export class HdbEditorProvider implements vscode.CustomReadonlyEditorProvider {
     <dl id="infoList"></dl>
   </details>
   <div id="message" hidden></div>
-  <!-- For manual testing: call only tchmgr inform -->
-  <div class="toolbar">
-    <button id="inform">tchmgr inform</button>
-    <button id="list">tchmgr list</button>
-    <button id="listPv">tchmgr list -pv</button>
-  </div>
   <pre id="debugOut"></pre>
 </header>
 <table id="records">
