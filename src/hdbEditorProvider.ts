@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { randomBytes } from 'crypto';
-import { readConfig, readInform} from './tchmgr';
+import { readConfig, readInform, readKeys} from './tchmgr';
 
 export class HdbEditorProvider implements vscode.CustomReadonlyEditorProvider {
   static readonly viewType = 'hdbviewer.hashDB';
@@ -23,15 +23,18 @@ export class HdbEditorProvider implements vscode.CustomReadonlyEditorProvider {
     const fileName = path.basename(document.uri.fsPath);
     let generation = 0;
 
-    // For manual testing: call only tchmgr inform .
+    // For manual testing: call only tchmgr inform / list.
     const subscription = webview.onDidReceiveMessage(async (msg: { type: string }) => {
-      if (msg.type !== 'inform') {
-        return;
-      }
       try {
         const cfg = readConfig();
-        const info = await readInform(cfg, cfg.noLock ? '-nl' : '-nb', document.uri.fsPath);
-        webview.postMessage({ type: 'inform', info });
+        const lock = cfg.noLock ? '-nl' : '-nb';
+        if (msg.type === 'inform') {
+          const info = await readInform(cfg, lock, document.uri.fsPath);
+          webview.postMessage({ type: 'inform', info });
+        } else if (msg.type === 'list') {
+          const keys = await readKeys(cfg, lock, document.uri.fsPath);
+          webview.postMessage({ type: 'keys', keys });
+        }
       } catch (e) {
         webview.postMessage({ type: 'error', message: e instanceof Error ? e.message : String(e) });
       }
@@ -89,6 +92,7 @@ export class HdbEditorProvider implements vscode.CustomReadonlyEditorProvider {
   <!-- For manual testing: call only tchmgr inform -->
   <div class="toolbar">
     <button id="inform">tchmgr inform</button>
+    <button id="list">tchmgr list</button>
   </div>
   <pre id="debugOut"></pre>
 </header>
