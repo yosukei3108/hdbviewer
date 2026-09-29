@@ -28,13 +28,20 @@ export class HdbEditorProvider implements vscode.CustomReadonlyEditorProvider {
       try {
         const cfg = readConfig();
         const lock = cfg.noLock ? '-nl' : '-nb';
-        if (msg.type === 'inform') {
+        if (msg.type === 'ready') {
+          // inform と list -pv を両方やって、まとめて送り返す
+          const [info, records] = await Promise.all([
+            readInform(cfg, lock, document.uri.fsPath),
+            readRecords(cfg, lock, document.uri.fsPath)
+          ]);
+          webview.postMessage({ type: 'data', fileName, info, records });
+        } else if (msg.type === 'inform') {
           const info = await readInform(cfg, lock, document.uri.fsPath);
           webview.postMessage({ type: 'inform', info });
         } else if (msg.type === 'list') {
           const keys = await readKeys(cfg, lock, document.uri.fsPath);
           webview.postMessage({ type: 'keys', keys });
-        } else if (msg.type === 'list-pv') {
+        } else if (msg.type === 'listPv') {
           const records = await readRecords(cfg, lock, document.uri.fsPath);
           webview.postMessage({ type: 'records', records });
         }
@@ -85,7 +92,7 @@ export class HdbEditorProvider implements vscode.CustomReadonlyEditorProvider {
     <span id="pageInfo" class="status"></span>
     <button id="next">Next →</button>
     <label><input id="jumpTo" type="number" min="1" placeholder="record #">Jump to record #</label>
-    <button id="jump">Go</button>
+    <button id="go">Go</button>
   </div>
   <details id="info">
     <summary>DB Info</summary>
@@ -96,7 +103,7 @@ export class HdbEditorProvider implements vscode.CustomReadonlyEditorProvider {
   <div class="toolbar">
     <button id="inform">tchmgr inform</button>
     <button id="list">tchmgr list</button>
-    <button id="list-pv">tchmgr list -pv</button>
+    <button id="listPv">tchmgr list -pv</button>
   </div>
   <pre id="debugOut"></pre>
 </header>
