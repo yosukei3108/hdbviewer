@@ -16,9 +16,9 @@
   let page = { offset: 0, pageSize: 0, hasNext: false };
 
 
-  function requestPage(offset) {
+  function requestLoad(type, offset) {
     setBusy(true);
-    vscode.postMessage({ type: 'page', offset: Math.max(0, offset) });
+    vscode.postMessage({ type, offset: Math.max(0, offset) });
   }
 
 
@@ -53,8 +53,9 @@
   }
 
 
-  els.prev.addEventListener('click', () => requestPage(page.offset - page.pageSize));
-  els.next.addEventListener('click', () => requestPage(page.offset + page.pageSize));
+  els.reload.addEventListener('click', () => requestLoad('reload', page.offset));
+  els.prev.addEventListener('click', () => requestLoad('page', page.offset - page.pageSize));
+  els.next.addEventListener('click', () => requestLoad('page', page.offset + page.pageSize));
 
   window.addEventListener('message', (event) => {
     const msg = event.data;
@@ -67,6 +68,7 @@
       els.out.textContent = 'HDB file is loaded';
     } else if (msg.type === 'error') {
       els.out.textContent = msg.message;
+      setBusy(false);
     }
   });
 

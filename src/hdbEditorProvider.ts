@@ -27,7 +27,7 @@ export class HdbEditorProvider implements vscode.CustomReadonlyEditorProvider {
       try {
         const cfg = readConfig();
         const lock = cfg.noLock ? '-nl' : '-nb';
-        if (msg.type === 'ready' || msg.type === 'page') {
+        if (msg.type === 'ready' || msg.type === 'reload' || msg.type === 'page') {
           const offset = typeof msg.offset === 'number' && msg.offset > 0 ? Math.floor(msg.offset) : 0;
           const [info, page] = await Promise.all([
             readInform(cfg, lock, document.uri.fsPath),
