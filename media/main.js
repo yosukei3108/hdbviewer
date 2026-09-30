@@ -1,8 +1,5 @@
 (function () {
   const vscode = acquireVsCodeApi();
-  const out = document.getElementById('debugOut');
-  const tbody = document.getElementById('tbody');
-
   const $ = (id) => document.getElementById(id);
   const els = {
     fileName: $('fileName'),
@@ -12,17 +9,18 @@
     next: $('next'),
     go: $('go'),
     infoList: $('infoList'),
+    tbody: $('tbody'),
+    out: $('debugOut'),
   }
 
   let page = { offset: 0, pageSize: 0, hasNext: false };
+
 
   function requestPage(offset) {
     setBusy(true);
     vscode.postMessage({ type: 'page', offset: Math.max(0, offset) });
   }
 
-  els.prev.addEventListener('click', () => requestPage(page.offset - page.pageSize));
-  els.next.addEventListener('click', () => requestPage(page.offset + page.pageSize));
 
   function renderInfo(info) {
     const fragment = document.createDocumentFragment();
@@ -51,8 +49,12 @@
       }
       return tr;
     });
-    tbody.replaceChildren(...rows);
+    els.tbody.replaceChildren(...rows);
   }
+
+
+  els.prev.addEventListener('click', () => requestPage(page.offset - page.pageSize));
+  els.next.addEventListener('click', () => requestPage(page.offset + page.pageSize));
 
   window.addEventListener('message', (event) => {
     const msg = event.data;
@@ -62,11 +64,19 @@
       renderInfo(msg.info);
       renderRecords(msg.records);
       setBusy(false);
-      out.textContent = 'HDB file is loaded';
+      els.out.textContent = 'HDB file is loaded';
     } else if (msg.type === 'error') {
-      out.textContent = msg.message;
+      els.out.textContent = msg.message;
     }
   });
+
+  function setBusy(busy) {
+    els.search.disabled = busy;
+    els.reload.disabled = busy;
+    els.prev.disabled = busy || page.offset <= 0;
+    els.next.disabled = busy || !page.hasNext;
+    els.go.disabled = busy;
+  }
 
 
   // utility functions
@@ -78,16 +88,8 @@
     return new TextDecoder().decode(bytes);
   }
 
-  function setBusy(busy) {
-    els.search.disabled = busy;
-    els.reload.disabled = busy;
-    els.prev.disabled = busy || page.offset <= 0;
-    els.next.disabled = busy || !page.hasNext;
-    els.go.disabled = busy;
-  }
-
 
   setBusy(true);
-  out.textContent = 'loading...';
+  els.out.textContent = 'loading...';
   vscode.postMessage({ type: 'ready' });
 })();
