@@ -23,17 +23,18 @@ export class HdbEditorProvider implements vscode.CustomReadonlyEditorProvider {
     const fileName = path.basename(document.uri.fsPath);
     let generation = 0;
 
-    const subscription = webview.onDidReceiveMessage(async (msg: { type: string; offset?: number }) => {
+    const subscription = webview.onDidReceiveMessage(async (msg: { type: string; offset?: number; prefix?: string }) => {
       try {
         const cfg = readConfig();
         const lock = cfg.noLock ? '-nl' : '-nb';
-        if (msg.type === 'ready' || msg.type === 'reload' || msg.type === 'page') {
+        if (msg.type === 'ready' || msg.type === 'reload' || msg.type === 'page' || msg.type === 'filter') {
           const offset = typeof msg.offset === 'number' && msg.offset > 0 ? Math.floor(msg.offset) : 0;
+          const prefix = typeof msg.prefix === 'string' ? msg.prefix : '';
           const [info, page] = await Promise.all([
             readInform(cfg, lock, document.uri.fsPath),
-            readRecords(cfg, lock, document.uri.fsPath, offset),
+            readRecords(cfg, lock, document.uri.fsPath, offset, prefix),
           ]);
-          webview.postMessage({ type: 'data', fileName, info, ...page });
+          webview.postMessage({ type: 'data', fileName, info, prefix, ...page });
         }
       } catch (e) {
         webview.postMessage({ type: 'error', message: e instanceof Error ? e.message : String(e) });
@@ -62,7 +63,7 @@ export class HdbEditorProvider implements vscode.CustomReadonlyEditorProvider {
     <span id="status" class="status"></span>
   </div>
   <div class="toolbar">
-    <input id="prefix" type="search" placeholder="Filter records by key prefix (Enter)">
+    <input id="prefix" type="search" placeholder="Filter records by key prefix">
     <button id="filter">Filter</button>
   </div>
   <div class="toolbar">

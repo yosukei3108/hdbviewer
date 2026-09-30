@@ -3,6 +3,7 @@
   const $ = (id) => document.getElementById(id);
   const els = {
     fileName: $('fileName'),
+    prefix: $('prefix'),
     filter: $('filter'),
     reload: $('reload'),
     prev: $('prev'),
@@ -13,12 +14,16 @@
     out: $('debugOut'),
   }
 
-  let page = { offset: 0, pageSize: 0, hasNext: false };
+  let page = { offset: 0, pageSize: 0, hasNext: false, prefix: '' };
 
 
-  function requestLoad(type, offset) {
+  function requestLoad(type, offset, prefix) {
     setBusy(true);
-    vscode.postMessage({ type, offset: Math.max(0, offset) });
+    vscode.postMessage({ type, offset: Math.max(0, offset), prefix });
+  }
+
+  function applyFilter() {
+    requestLoad('filter', 0, els.prefix.value);
   }
 
 
@@ -52,15 +57,16 @@
     els.tbody.replaceChildren(...rows);
   }
 
-
-  els.reload.addEventListener('click', () => requestLoad('reload', page.offset));
-  els.prev.addEventListener('click', () => requestLoad('page', page.offset - page.pageSize));
-  els.next.addEventListener('click', () => requestLoad('page', page.offset + page.pageSize));
+  els.prefix.addEventListener('keydown', (e) => { if (e.key === 'Enter') { applyFilter(); } });
+  els.filter.addEventListener('click', applyFilter);
+  els.reload.addEventListener('click', () => requestLoad('reload', page.offset, page.prefix));
+  els.prev.addEventListener('click', () => requestLoad('page', page.offset - page.pageSize, page.prefix));
+  els.next.addEventListener('click', () => requestLoad('page', page.offset + page.pageSize, page.prefix));
 
   window.addEventListener('message', (event) => {
     const msg = event.data;
     if (msg.type === 'data') {
-      page = { offset: msg.offset, pageSize: msg.pageSize, hasNext: msg.hasNext };
+      page = { offset: msg.offset, pageSize: msg.pageSize, hasNext: msg.hasNext, prefix: msg.prefix };
       els.fileName.textContent = msg.fileName;
       renderInfo(msg.info);
       renderRecords(msg.records);

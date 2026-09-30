@@ -48,9 +48,9 @@ export function readConfig(): Config {
 
   return {
     tchmgrPath: c.get<string>('tchmgrPath', 'tchmgr'),
-    recordsPerPage: Math.max(1, c.get<number>('recordsPerPage', 1000)),
+    recordsPerPage: Math.max(1, c.get<number>('recordsPerPage', 100)),
     previewBytes: Math.max(1, c.get<number>('previewBytes', 1024)),
-    maxFullValueBytes: Math.max(1, c.get<number>('maxFullValueBytes', 8 * 1024 * 1024)),
+    maxFullValueBytes: Math.max(1, c.get<number>('maxFullValueBytes', 4 * 1024)),
     noLock: c.get<boolean>('noLock', false)
   };
 }
@@ -104,10 +104,21 @@ function parseInform(output: string): Record<string, string> {
 }
 
 
-export async function readRecords(cfg: Config, lock: string, filePath: string, offset: number): Promise<RecordPage> {
+export async function readRecords(
+  cfg: Config,
+  lock: string,
+  filePath: string,
+  offset: number,
+  prefix: string,
+): Promise<RecordPage> {
   const limit = offset + cfg.recordsPerPage + 1;
+  const matchArgs = prefix ? ['-fm', prefix] : [];
   const chunks: Buffer[] = [];
-  await spawnTchmgr(cfg, ['list', lock, '-m', String(limit), '-px', '-pv', filePath], (chunk) => chunks.push(chunk));
+  await spawnTchmgr(
+    cfg,
+    ['list', lock, ...matchArgs, '-m', String(limit), '-px', '-pv', filePath],
+    (chunk) => chunks.push(chunk)
+  );
 
   // TODO: Stream the output instead of buffering it all with Buffer.concat.
   const all = parseRecords(Buffer.concat(chunks).toString('utf8'));
