@@ -79,8 +79,8 @@ select:focus {
   background: var(--vscode-button-secondaryHoverBackground);
 }
 
-#filter,
-#prefix {
+#prefix,
+#searchText {
   flex: 1 1 200px;
   min-width: 120px;
 }

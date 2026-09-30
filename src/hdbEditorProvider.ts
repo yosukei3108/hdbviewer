@@ -62,11 +62,11 @@ export class HdbEditorProvider implements vscode.CustomReadonlyEditorProvider {
     <span id="status" class="status"></span>
   </div>
   <div class="toolbar">
-    <input id="prefix" type="search" placeholder="Search the whole DB by key prefix (Enter)">
-    <button id="search">Search</button>
+    <input id="prefix" type="search" placeholder="Filter records by key prefix (Enter)">
+    <button id="filter">Filter</button>
   </div>
   <div class="toolbar">
-    <input id="filter" type="search" placeholder="Filter within loaded records">
+    <input id="searchText" type="search" placeholder="Search text within loaded records">
     <label>Display
       <select id="mode">
         <option value="auto">Auto</option>

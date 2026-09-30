@@ -3,7 +3,7 @@
   const $ = (id) => document.getElementById(id);
   const els = {
     fileName: $('fileName'),
-    search: $('search'),
+    filter: $('filter'),
     reload: $('reload'),
     prev: $('prev'),
     next: $('next'),
@@ -73,7 +73,7 @@
   });
 
   function setBusy(busy) {
-    els.search.disabled = busy;
+    els.filter.disabled = busy;
     els.reload.disabled = busy;
     els.prev.disabled = busy || page.offset <= 0;
     els.next.disabled = busy || !page.hasNext;
