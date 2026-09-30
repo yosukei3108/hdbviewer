@@ -32,7 +32,28 @@
         "command": "hdbviewer.open",
         "title": "HDB Viewer: Open Hash DB"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "HDB Viewer",
+      "properties": {
+        "hdbviewer.tchmgrPath": {
+          "type": "string",
+          "default": "tchmgr",
+          "description": "Path to the tchmgr command. Specify the full path if it is not on PATH."
+        },
+        "hdbviewer.recordsPerPage": {
+          "type": "number",
+          "default": 1000,
+          "minimum": 1,
+          "description": "Number of records to display per page"
+        },
+        "hdbviewer.noLock": {
+          "type": "boolean",
+          "default": false,
+          "description": "When true, read the file without taking a file lock (tchmgr -nl). When false, do not wait for the lock (-nb)."
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",

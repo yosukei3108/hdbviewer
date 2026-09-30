@@ -14,6 +14,15 @@
     infoList: $('infoList'),
   }
 
+  let page = { offset: 0, pageSize: 0, hasNext: false };
+
+  function requestPage(offset) {
+    setBusy(true);
+    vscode.postMessage({ type: 'page', offset: Math.max(0, offset) });
+  }
+
+  els.prev.addEventListener('click', () => requestPage(page.offset - page.pageSize));
+  els.next.addEventListener('click', () => requestPage(page.offset + page.pageSize));
 
   function renderInfo(info) {
     const fragment = document.createDocumentFragment();
@@ -31,7 +40,7 @@
     const rows = records.map((r, i) => {
       const tr = document.createElement('tr');
       for (const [text, cls] of [
-        [String(i + 1), 'num'],
+        [String(page.offset + i + 1), 'num'],
         [hexToText(r.key), 'text'],
         [hexToText(r.value), 'text']
       ]) {
@@ -48,6 +57,7 @@
   window.addEventListener('message', (event) => {
     const msg = event.data;
     if (msg.type === 'data') {
+      page = { offset: msg.offset, pageSize: msg.pageSize, hasNext: msg.hasNext };
       els.fileName.textContent = msg.fileName;
       renderInfo(msg.info);
       renderRecords(msg.records);
@@ -71,8 +81,8 @@
   function setBusy(busy) {
     els.search.disabled = busy;
     els.reload.disabled = busy;
-    els.prev.disabled = busy;
-    els.next.disabled = busy;
+    els.prev.disabled = busy || page.offset <= 0;
+    els.next.disabled = busy || !page.hasNext;
     els.go.disabled = busy;
   }
 

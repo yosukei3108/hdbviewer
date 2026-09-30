@@ -4,7 +4,7 @@ import { spawn } from 'child_process';
 
 export interface Config {
   tchmgrPath: string;
-  maxRecords: number;
+  recordsPerPage: number;
   previewBytes: number;
   maxFullValueBytes: number;
   noLock: boolean;
@@ -20,6 +20,14 @@ export interface HdbRecord {
   valueLoaded: boolean;
 }
 
+export interface RecordPage {
+  records: HdbRecord[];
+  offset: number;
+  pageSize: number;
+  hasNext: boolean;
+}
+
+/*
 export interface HdbSnapshot {
   info: Record<string, string>;
   records: HdbRecord[];
@@ -27,6 +35,7 @@ export interface HdbSnapshot {
   pageSize: number;
   hasNext: boolean;
 }
+*/
 
 interface TchmgrError {
   code?: string;
@@ -39,7 +48,7 @@ export function readConfig(): Config {
 
   return {
     tchmgrPath: c.get<string>('tchmgrPath', 'tchmgr'),
-    maxRecords: Math.max(1, c.get<number>('maxRecords', 1000)),
+    recordsPerPage: Math.max(1, c.get<number>('recordsPerPage', 1000)),
     previewBytes: Math.max(1, c.get<number>('previewBytes', 1024)),
     maxFullValueBytes: Math.max(1, c.get<number>('maxFullValueBytes', 8 * 1024 * 1024)),
     noLock: c.get<boolean>('noLock', false)
@@ -95,11 +104,20 @@ function parseInform(output: string): Record<string, string> {
 }
 
 
-export async function readRecords(cfg: Config, lock: string, filePath: string): Promise<HdbRecord[]> {
+export async function readRecords(cfg: Config, lock: string, filePath: string, offset: number): Promise<RecordPage> {
+  const limit = offset + cfg.recordsPerPage + 1;
   const chunks: Buffer[] = [];
-  await spawnTchmgr(cfg, ['list', lock, '-px', '-pv', filePath], (chunk) => chunks.push(chunk));
+  await spawnTchmgr(cfg, ['list', lock, '-m', String(limit), '-px', '-pv', filePath], (chunk) => chunks.push(chunk));
 
-  return parseRecords(Buffer.concat(chunks).toString('utf8'));
+  // TODO: Stream the output instead of buffering it all with Buffer.concat.
+  const all = parseRecords(Buffer.concat(chunks).toString('utf8'));
+
+  return {
+    records: all.slice(offset, offset + cfg.recordsPerPage),
+    offset,
+    pageSize: cfg.recordsPerPage,
+    hasNext: all.length > offset + cfg.recordsPerPage,
+  };
 }
 
 function parseRecords(output: string): HdbRecord[] {

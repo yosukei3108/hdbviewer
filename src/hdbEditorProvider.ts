@@ -23,16 +23,17 @@ export class HdbEditorProvider implements vscode.CustomReadonlyEditorProvider {
     const fileName = path.basename(document.uri.fsPath);
     let generation = 0;
 
-    const subscription = webview.onDidReceiveMessage(async (msg: { type: string }) => {
+    const subscription = webview.onDidReceiveMessage(async (msg: { type: string; offset?: number }) => {
       try {
         const cfg = readConfig();
         const lock = cfg.noLock ? '-nl' : '-nb';
-        if (msg.type === 'ready') {
-          const [info, records] = await Promise.all([
+        if (msg.type === 'ready' || msg.type === 'page') {
+          const offset = typeof msg.offset === 'number' && msg.offset > 0 ? Math.floor(msg.offset) : 0;
+          const [info, page] = await Promise.all([
             readInform(cfg, lock, document.uri.fsPath),
-            readRecords(cfg, lock, document.uri.fsPath)
+            readRecords(cfg, lock, document.uri.fsPath, offset),
           ]);
-          webview.postMessage({ type: 'data', fileName, info, records });
+          webview.postMessage({ type: 'data', fileName, info, ...page });
         }
       } catch (e) {
         webview.postMessage({ type: 'error', message: e instanceof Error ? e.message : String(e) });
