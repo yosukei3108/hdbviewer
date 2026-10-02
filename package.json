@@ -2,15 +2,22 @@
   "name": "hdbviewer",
   "displayName": "Tokyo Cabinet HDB Viewer",
   "description": "Display the contents of a Tokyo Cabinet Hash DB file as a table",
-  "keywords": ["tokyo cabinet", "tch", "hdb", "tchmgr"],
-  "categories": ["Visualization"],
+  "keywords": [
+    "tokyo cabinet",
+    "tch",
+    "hdb",
+    "tchmgr"
+  ],
+  "categories": [
+    "Visualization"
+  ],
   "publisher": "yosukei3108",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/yosukei3108/hdbviewer"
   },
-  "version": "0.0.1",
+  "version": "0.0.2",
   "engines": {
     "vscode": "^1.138.0"
   },
