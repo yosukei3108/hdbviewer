@@ -3,6 +3,7 @@ import * as path from 'path';
 import { randomBytes } from 'crypto';
 import { readConfig, readInform, readRecords } from './tchmgr';
 
+
 export class HdbEditorProvider implements vscode.CustomReadonlyEditorProvider {
   static readonly viewType = 'hdbviewer.hashDB';
 
@@ -21,7 +22,6 @@ export class HdbEditorProvider implements vscode.CustomReadonlyEditorProvider {
     webview.html = this.getHtml(webview);
 
     const fileName = path.basename(document.uri.fsPath);
-    let generation = 0;
 
     const subscription = webview.onDidReceiveMessage(async (msg: { type: string; offset?: number; prefix?: string }) => {
       try {
@@ -60,7 +60,6 @@ export class HdbEditorProvider implements vscode.CustomReadonlyEditorProvider {
 <header>
   <div class="title-row">
     <span id="fileName" class="file-name"></span>
-    <span id="status" class="status"></span>
   </div>
   <div class="toolbar">
     <input id="prefix" type="search" placeholder="Filter records by key prefix">
@@ -69,29 +68,16 @@ export class HdbEditorProvider implements vscode.CustomReadonlyEditorProvider {
   <div class="toolbar">
     <input id="searchText" type="search" placeholder="Search text within loaded records">
     <span id="searchCount" class="status"></span>
-    <label>Display
-      <select id="mode">
-        <option value="auto">Auto</option>
-        <option value="text">Text</option>
-        <option value="hex">Hex</option>
-      </select>
-    </label>
-    <label><input id="showValues" type="checkbox">Show values</label>
     <button id="reload">Reload</button>
   </div>
   <div class="toolbar pager">
     <button id="prev">← Prev</button>
-    <span id="pageInfo" class="status"></span>
     <button id="next">Next →</button>
-    <label><input id="jumpTo" type="number" min="1" placeholder="record #">Jump to record #</label>
-    <button id="go">Go</button>
   </div>
   <details id="info">
     <summary>DB Info</summary>
     <dl id="infoList"></dl>
   </details>
-  <div id="message" hidden></div>
-  <pre id="debugOut"></pre>
 </header>
 <table id="records">
   <thead>

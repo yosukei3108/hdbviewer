@@ -5,19 +5,12 @@ import { spawn } from 'child_process';
 export interface Config {
   tchmgrPath: string;
   recordsPerPage: number;
-  previewBytes: number;
-  maxFullValueBytes: number;
   noLock: boolean;
 }
 
 export interface HdbRecord {
   key: string;
-  keyTruncated: boolean;
-  keyBytes: number;
   value: string;
-  valueTruncated: boolean;
-  valueBytes: number;
-  valueLoaded: boolean;
 }
 
 export interface RecordPage {
@@ -26,16 +19,6 @@ export interface RecordPage {
   pageSize: number;
   hasNext: boolean;
 }
-
-/*
-export interface HdbSnapshot {
-  info: Record<string, string>;
-  records: HdbRecord[];
-  offset: number;
-  pageSize: number;
-  hasNext: boolean;
-}
-*/
 
 interface TchmgrError {
   code?: string;
@@ -49,8 +32,6 @@ export function readConfig(): Config {
   return {
     tchmgrPath: c.get<string>('tchmgrPath', 'tchmgr'),
     recordsPerPage: Math.max(1, c.get<number>('recordsPerPage', 100)),
-    previewBytes: Math.max(1, c.get<number>('previewBytes', 1024)),
-    maxFullValueBytes: Math.max(1, c.get<number>('maxFullValueBytes', 4 * 1024)),
     noLock: c.get<boolean>('noLock', false)
   };
 }
@@ -83,7 +64,6 @@ function spawnTchmgr(cfg: Config, args: string[], onStdout: (chunk: Buffer) => v
 }
 
 export async function readInform(cfg: Config, lock: string, filePath: string): Promise<Record<string, string>> {
-// async function readInform(cfg: Config, lock: string, filePath: string): Promise<Record<string, string>> {
   const chunks: Buffer[] = [];
   await spawnTchmgr(cfg, ['inform', lock, filePath], (chunk) => chunks.push(chunk));
 
@@ -141,12 +121,7 @@ function parseRecords(output: string): HdbRecord[] {
     const [key, value] = line.split('\t').map((hex) => hex.replace(/ /g, ''));
     records.push({
       key,
-      keyTruncated: false,
-      keyBytes: key.length / 2,
       value,
-      valueTruncated: false,
-      valueBytes: value.length / 2,
-      valueLoaded: true,
     });
   }
 
@@ -160,9 +135,6 @@ function describeError(err: TchmgrError, stderr: string, cfg: Config): string {
   }
 
   const detail = stderr.trim() || err.message;
-  if (/no record found/i.test(detail)) {
-    return 'No record was found (it may have been deleted after loading).';
-  }
 
   return `Failed to execute tchmgr.\n${detail}`;
 }

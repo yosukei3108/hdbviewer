@@ -43,7 +43,7 @@
         },
         "hdbviewer.recordsPerPage": {
           "type": "number",
-          "default": 1000,
+          "default": 100,
           "minimum": 1,
           "description": "Number of records to display per page"
         },

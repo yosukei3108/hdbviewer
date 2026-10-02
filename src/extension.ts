@@ -3,8 +3,7 @@
 import * as vscode from 'vscode';
 import { HdbEditorProvider } from './hdbEditorProvider';
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
+
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.window.registerCustomEditorProvider(HdbEditorProvider.viewType, new HdbEditorProvider(context), {

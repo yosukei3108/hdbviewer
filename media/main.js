@@ -10,10 +10,8 @@
     reload: $('reload'),
     prev: $('prev'),
     next: $('next'),
-    go: $('go'),
     infoList: $('infoList'),
     tbody: $('tbody'),
-    out: $('debugOut'),
   }
 
   let page = { offset: 0, pageSize: 0, hasNext: false, prefix: '' };
@@ -93,9 +91,7 @@
       renderRecords(msg.records);
       applySearch();
       setBusy(false);
-      els.out.textContent = 'HDB file is loaded';
     } else if (msg.type === 'error') {
-      els.out.textContent = msg.message;
       setBusy(false);
     }
   });
@@ -105,11 +101,9 @@
     els.reload.disabled = busy;
     els.prev.disabled = busy || page.offset <= 0;
     els.next.disabled = busy || !page.hasNext;
-    els.go.disabled = busy;
   }
 
 
-  // utility functions
   function hexToText(hex) {
     const bytes = new Uint8Array(hex.length / 2);
     for (let i = 0; i < bytes.length; i++) {
@@ -120,6 +114,5 @@
 
 
   setBusy(true);
-  els.out.textContent = 'loading...';
   vscode.postMessage({ type: 'ready' });
 })();
