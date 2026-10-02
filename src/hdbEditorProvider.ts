@@ -68,6 +68,7 @@ export class HdbEditorProvider implements vscode.CustomReadonlyEditorProvider {
   </div>
   <div class="toolbar">
     <input id="searchText" type="search" placeholder="Search text within loaded records">
+    <span id="searchCount" class="status"></span>
     <label>Display
       <select id="mode">
         <option value="auto">Auto</option>

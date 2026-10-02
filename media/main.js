@@ -5,6 +5,8 @@
     fileName: $('fileName'),
     prefix: $('prefix'),
     filter: $('filter'),
+    searchText: $('searchText'),
+    searchCount: $('searchCount'),
     reload: $('reload'),
     prev: $('prev'),
     next: $('next'),
@@ -24,6 +26,24 @@
 
   function applyFilter() {
     requestLoad('filter', 0, els.prefix.value);
+  }
+
+  function applySearch() {
+    const keyword = els.searchText.value.toLowerCase();
+    let count = 0;
+    for (const tr of els.tbody.rows) {
+      const [, keyCell, valueCell] = tr.cells;
+      const hit =
+        keyword !== '' &&
+        (keyCell.textContent.toLowerCase().includes(keyword) ||
+          valueCell.textContent.toLowerCase().includes(keyword));
+      tr.classList.toggle('match', hit);
+      tr.hidden = keyword !== '' && !hit;
+      if (hit) {
+        count++;
+      }
+    }
+    els.searchCount.textContent = keyword === '' ? '' : `${count} hits`;
   }
 
 
@@ -59,6 +79,7 @@
 
   els.prefix.addEventListener('keydown', (e) => { if (e.key === 'Enter') { applyFilter(); } });
   els.filter.addEventListener('click', applyFilter);
+  els.searchText.addEventListener('input', applySearch);
   els.reload.addEventListener('click', () => requestLoad('reload', page.offset, page.prefix));
   els.prev.addEventListener('click', () => requestLoad('page', page.offset - page.pageSize, page.prefix));
   els.next.addEventListener('click', () => requestLoad('page', page.offset + page.pageSize, page.prefix));
@@ -70,6 +91,7 @@
       els.fileName.textContent = msg.fileName;
       renderInfo(msg.info);
       renderRecords(msg.records);
+      applySearch();
       setBusy(false);
       els.out.textContent = 'HDB file is loaded';
     } else if (msg.type === 'error') {
