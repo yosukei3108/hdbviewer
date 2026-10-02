@@ -70,7 +70,7 @@ export async function readInform(cfg: Config, lock: string, filePath: string): P
   return parseInform(Buffer.concat(chunks).toString('utf8'));
 }
 
-function parseInform(output: string): Record<string, string> {
+export function parseInform(output: string): Record<string, string> {
   const inform: Record<string, string> = {};
   for (const line of output.split('\n')) {
     const idx = line.indexOf(':');
@@ -111,14 +111,13 @@ export async function readRecords(
   };
 }
 
-function parseRecords(output: string): HdbRecord[] {
+export function parseRecords(output: string): HdbRecord[] {
   const records: HdbRecord[] = [];
   const lines = output.split('\n');
   // Drop the '' after the trailing newline. Note that Tokyo Cabinet allows empty keys.
   lines.pop();
   for (const line of lines) {
-    // "66 6F 6F<TAB>62 61 72" -> key "666F6F", value "626172"
-    const [key, value] = line.split('\t').map((hex) => hex.replace(/ /g, ''));
+    const [key, value = ''] = line.split('\t').map((hex) => hex.replace(/ /g, ''));
     records.push({
       key,
       value,
