@@ -12,7 +12,7 @@
     next: $('next'),
     infoList: $('infoList'),
     tbody: $('tbody'),
-  }
+  };
 
   let page = { offset: 0, pageSize: 0, hasNext: false, prefix: '' };
 
