@@ -1,7 +1,9 @@
 {
   "name": "hdbviewer",
-  "displayName": "HDB Viewer",
+  "displayName": "Tokyo Cabinet HDB Viewer",
   "description": "Display the contents of a Tokyo Cabinet Hash DB file as a table",
+  "keywords": ["tokyo cabinet", "tch", "hdb", "tchmgr"],
+  "categories": ["Visualization"],
   "publisher": "yosukei3108",
   "license": "MIT",
   "repository": {
@@ -12,9 +14,6 @@
   "engines": {
     "vscode": "^1.138.0"
   },
-  "categories": [
-    "Other"
-  ],
   "main": "./dist/extension.js",
   "contributes": {
     "customEditors": [

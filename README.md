@@ -1,4 +1,4 @@
-# HDB Viewer
+# Tokyo Cabinet HDB Viewer
 
 A read-only VS Code custom editor that displays the contents of a
 Tokyo Cabinet hash database (`*.tch`, `*.hdb`) as a table.
