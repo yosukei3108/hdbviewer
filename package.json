@@ -2,6 +2,12 @@
   "name": "hdbviewer",
   "displayName": "HDB Viewer",
   "description": "Display the contents of a Tokyo Cabinet Hash DB file as a table",
+  "publisher": "yosukei3108",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yosukei3108/hdbviewer"
+  },
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.138.0"

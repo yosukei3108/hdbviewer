@@ -46,3 +46,7 @@ npm install
 ```
 
 Open this folder in VS Code and press F5 to launch the Extension Development Host.
+
+## License
+
+[MIT](LICENSE)
