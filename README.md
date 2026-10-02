@@ -1,71 +1,48 @@
-# hdbviewer README
+# HDB Viewer
 
-This is the README for your extension "hdbviewer". After writing up a brief description, we recommend including the following sections.
-
-## Features
-
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
-
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+A read-only VS Code custom editor that displays the contents of a
+Tokyo Cabinet hash database (`*.tch`, `*.hdb`) as a table.
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+- `tchmgr` (from Tokyo Cabinet) must be installed.
+  If it is not on your `PATH`, set `hdbviewer.tchmgrPath`.
+
+## Usage
+
+- Open a `*.tch` or `*.hdb` file. It opens in HDB Viewer by default.
+- Or run **HDB Viewer: Open Hash DB** from the Command Palette.
+
+## Features
+
+- **Filter**: Load only records whose key starts with the given prefix
+  (`tchmgr list -fm`). Press Enter or click **Filter**.
+- **Search**: Find text in the keys and values of the records on the
+  current page. Non-matching rows are hidden.
+- **Paging**: Use **Prev** / **Next** to move between pages.
+- **Reload**: Re-read the current page from the file.
+- **DB Info**: Show the output of `tchmgr inform`.
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+| Setting | Default | Description |
+| --- | --- | --- |
+| `hdbviewer.tchmgrPath` | `tchmgr` | Path to the `tchmgr` command. |
+| `hdbviewer.recordsPerPage` | `100` | Number of records per page. |
+| `hdbviewer.noLock` | `false` | Read without a file lock (`-nl`). When `false`, do not wait for the lock (`-nb`). |
 
-For example:
+## Known Limitations
 
-This extension contributes the following settings:
+- The extension is read-only. It cannot edit records.
+- Keys and values are shown as UTF-8 text. Binary data may look garbled.
+- Search only looks at the current page. Use Filter to narrow down the whole DB.
+- `tchmgr` has no "start from record N" option, so later pages read
+  all preceding records first and become slower on large files.
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+## Development
 
-## Known Issues
+```sh
+npm install
+```
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+Open this folder in VS Code and press F5 to launch the Extension Development Host.
